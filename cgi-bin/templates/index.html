@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Список взятых книг</title>
+</head>
+<body>
+<h2>Привет, {{ session['username'] }}</h2>
+<a class="navbar-brand" href="/add_book">Взять книгу из библиотеки</a>
+{% for book in book_list %}
+    <div class="alert alert-dark" role="alert">
+        <h2>{{book[0]}}</h2>
+    <img src="{{book[2]}}" alt="здесь должна была быть картинка,
+        но не нашлась">
+        <div>{{book[1]}}</div>
+    </div>
+<a href="/remove_book/{{book[3]}}">Вернуть экземпляр в библиотеку</a>
+<hr>
+{% endfor %}
+</body>
+{% endblock %}

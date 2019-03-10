@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи</title>
+</head>
+<body>
+<div>
+<table border="1">
+    <tr><th>id</th> <th>имя</th> <th>пароль</th> <th>кол-во взятых книг</th></tr>
+    {% for user in users %}
+        <tr>
+        {% for col in user %}
+        <td>{{ col }}</td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+</div>
+    <hr>
+    <a class="navbar-brand" href="/admin_add_user">Добавить пользователя</a>
+    <hr>
+    <a class="navbar-brand" href="/admin_book_list">Список книг</a>
+</body>
+{% endblock %}

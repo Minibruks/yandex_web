@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Книги</title>
+</head>
+<body>
+<a href="/admin">Назад</a><hr>
+    <h1>Список доступных для пользователей книг</h1>
+    <a class="navbar-brand" href="/admin_add_book">Добавить книгу</a>
+    {% for book in book_list %}
+        <h2>{{book[0]}}</h2>
+    <img src="{{book[1]}}" alt="здесь должна была быть картинка,
+        но не нашлась">
+    <br>осталось экземпляров {{book[2]}}
+    <hr>
+
+    {% endfor %}
+</body>
+{% endblock %}
