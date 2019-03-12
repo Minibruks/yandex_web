@@ -62,13 +62,14 @@ class UserModel:
         cursor = self.connection.cursor()
         cursor.execute('''INSERT INTO users 
                           (user_name, password_hash) 
-                          VALUES (?,?)''', (user_name, password_hash))
+                          VALUES (:user_name,:password_hash)''',
+                       {"user_name": str(user_name), "password_hash": str(password_hash)})
         cursor.close()
         self.connection.commit()
 
     def get(self, user_id):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM users WHERE id = ?", (str(user_id)))
+        cursor.execute("SELECT * FROM users WHERE id = :user_id", {"user_id": int(user_id)})
         row = cursor.fetchone()
         return row
 
@@ -80,8 +81,8 @@ class UserModel:
 
     def exists(self, user_name, password_hash):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM users WHERE user_name = ? AND password_hash = ?",
-                       (user_name, password_hash))
+        cursor.execute("SELECT * FROM users WHERE user_name = :user_name AND password_hash = :password_hash",
+                       {"user_name": str(user_name), "password_hash": str(password_hash)})
         row = cursor.fetchone()
         return (True, row[0]) if row else (False,)
 
@@ -105,13 +106,14 @@ class Library:
         cursor = self.connection.cursor()
         cursor.execute('''INSERT INTO library 
                                   (title, content, label, count) 
-                                  VALUES (?,?,?,?)''', (title, content, label, str(book_count)))
+                                  VALUES (:title,:content,:label,:book_count)''',
+                       {"title": str(title), "content": str(content), "label": str(label), "book_count": int(book_count)})
         cursor.close()
         self.connection.commit()
 
     def get(self, title):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT title, content, label, id, count FROM library WHERE title = ?", title)
+        cursor.execute("SELECT title, content, label, id, count FROM library WHERE title = :title", {"title": str(title)})
         row = cursor.fetchone()
         return row
 
@@ -143,14 +145,14 @@ class Books:
         cursor = self.connection.cursor()
         cursor.execute('''INSERT INTO books 
                           (library_id, user_id) 
-                          VALUES (?,?)''', (str(library_id), str(user_id)))
-        cursor.execute('''UPDATE library SET count = count - 1 WHERE id = ?''', str(library_id))
+                          VALUES (:library_id,:user_id)''', {"library_id": int(library_id), "user_id": int(user_id)})
+        cursor.execute('''UPDATE library SET count = count - 1 WHERE id = :library_id''', {"library_id": int(library_id)})
         cursor.close()
         self.connection.commit()
 
     def get(self, book_id):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM books WHERE id = ?", (str(book_id)))
+        cursor.execute("SELECT * FROM books WHERE id = :book_id", {"book_id": int(book_id)})
         row = cursor.fetchone()
         return row
 
@@ -159,8 +161,8 @@ class Books:
         if book_id:
             cursor.execute('''SELECT library.title, library.content, library.label, books.id FROM books 
                             LEFT JOIN library ON books.library_id = library.id  
-                            WHERE user_id = ? ORDER BY library.title''',
-                           (str(book_id)))
+                            WHERE user_id = :book_id ORDER BY library.title''',
+                           {"book_id": int(book_id)})
         else:
             cursor.execute("SELECT * FROM books")
         rows = cursor.fetchall()
@@ -168,15 +170,15 @@ class Books:
 
     def delete(self, book_id):
         cursor = self.connection.cursor()
-        cursor.execute('''DELETE FROM books WHERE id = ?''', (str(book_id)))
+        cursor.execute('''DELETE FROM books WHERE id = :book_id''', {"book_id": int(book_id)})
         cursor.close()
         self.connection.commit()
 
     def remove(self, book_id):
         cursor = self.connection.cursor()
-        cursor.execute('''SELECT library_id FROM books WHERE id = ? ''', (str(book_id)))
+        cursor.execute('''SELECT library_id FROM books WHERE id = :book_id''', {"book_id": int(book_id)})
         rows = cursor.fetchone()
-        cursor.execute('''UPDATE library SET count = count + 1 WHERE id = ?''', str(rows[0]))
+        cursor.execute('''UPDATE library SET count = count + 1 WHERE id = :library_id''', {"library_id": int(rows[0])})
         self.delete(book_id)
         cursor.close()
         self.connection.commit()
@@ -202,7 +204,7 @@ library.init_table()
 
 @app.route('/admin')
 def admin():
-    # all_users = list('</td><td>'.join(list(map(str, [elem[0], elem[1], ' пароль', elem[2]]))) for elem in users.get_all())
+
     all_users = list(users.get_all())
     users_list = []
     for row_u in all_users:
@@ -211,8 +213,6 @@ def admin():
             row.append(el)
         row.append(str(len(books.get_all(row_u[0]))))
         users_list.append(row)
-        # all_users[i].append(str(len(books.get_all(users.get_all()[i][0]))))
-    # print(users_list)
     return render_template('admin.html', users=users_list)
 
 
